@@ -7,7 +7,8 @@ module Pod
   class AggregateTarget < Target
     # Product types where the product's frameworks must be embedded in a host target
     #
-    EMBED_FRAMEWORKS_IN_HOST_TARGET_TYPES = [:app_extension, :framework, :static_library, :messages_extension, :watch_extension, :xpc_service].freeze
+    EMBED_FRAMEWORKS_IN_HOST_TARGET_TYPES = [:app_extension, :framework, :static_library, :messages_extension,
+                                             :watch_extension, :xpc_service].freeze
 
     # TODO
     #
@@ -100,6 +101,7 @@ module Pod
       end
       AggregateTarget.new(sandbox, host_requires_frameworks, user_build_configurations, archs, platform,
                           target_definition, client_root, user_project, user_target_uuids, merged, :build_type => build_type).tap do |aggregate_target|
+        aggregate_target.xcasset_paths = xcasset_paths
         aggregate_target.search_paths_aggregate_targets.concat(search_paths_aggregate_targets).freeze
       end
     end
@@ -262,6 +264,8 @@ module Pod
             resource_paths << bridge_support_file
             resource_paths.compact.uniq
           end
+          resources_by_config[config].push(*xcasset_paths)
+          resources_by_config[config]
         end
       end
     end
@@ -334,6 +338,12 @@ module Pod
     #
     def check_manifest_lock_script_output_file_path
       "$(DERIVED_FILE_DIR)/#{label}-checkManifestLockResult.txt"
+    end
+
+    # TODO
+    #
+    def shit
+      "$(DERIVED_FILE_DIR)/#{label}-copyResourcesScriptResult.txt"
     end
 
     # @return [Pathname] The relative path of the Pods directory from user project's directory.

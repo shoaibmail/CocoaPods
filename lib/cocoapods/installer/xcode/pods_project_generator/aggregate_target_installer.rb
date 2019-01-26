@@ -137,7 +137,7 @@ module Pod
           #
           def create_copy_resources_script
             path = target.copy_resources_script_path
-            generator = Generator::CopyResourcesScript.new(target.resource_paths_by_config, target.platform)
+            generator = Pod::Generator::CopyResourcesScript.new(target.resource_paths_by_config, target.platform)
             update_changed_file(generator, path)
             add_file_to_support_group(path)
           end

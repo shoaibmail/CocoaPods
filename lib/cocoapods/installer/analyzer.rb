@@ -484,7 +484,7 @@ module Pod
         x = AggregateTarget.new(sandbox, target_definition.uses_frameworks?, user_build_configurations, archs, platform,
                             target_definition, client_root, user_project, user_target_uuids,
                             pod_targets_for_build_configuration, :build_type => build_type)
-        x.xcasset_paths = target_inspection.xcasset_paths
+        x.xcasset_paths = target_inspection.user_xcassets_paths
         x
       end
 
@@ -1050,7 +1050,7 @@ module Pod
         UI.section 'Inspecting targets to integrate' do
           inspectors = @podfile_dependency_cache.target_definition_list.map do |target_definition|
             next if target_definition.abstract?
-            TargetInspector.new(target_definition, config.installation_root)
+            TargetInspector.new(sandbox, target_definition, config.installation_root)
           end.compact
           inspectors.group_by(&:compute_project_path).each do |project_path, target_inspectors|
             project = Xcodeproj::Project.open(project_path)

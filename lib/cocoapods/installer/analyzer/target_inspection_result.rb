@@ -34,7 +34,9 @@ module Pod
         #
         attr_reader :client_root
 
-        attr_accessor :xcasset_paths
+        # @return [Array<String>] the xcassets paths used by user's targets
+        #
+        attr_reader :user_xcassets_paths
 
         # Initialize a new instance
         #
@@ -44,8 +46,10 @@ module Pod
         # @param [Hash{String=>Symbol}] build_configurations @see #build_configurations
         # @param [Platform] platform @see #platform
         # @param [Array<String>] archs @see #archs
+        # @param [Array<String>] user_xcassets_paths @see #user_xcassets_paths
         #
-        def initialize(target_definition, project, project_target_uuids, build_configurations, platform, archs)
+        def initialize(target_definition, project, project_target_uuids, build_configurations, platform, archs,
+                       user_xcassets_paths)
           @target_definition = target_definition
           @project = project
           @project_target_uuids = project_target_uuids
@@ -53,6 +57,7 @@ module Pod
           @platform = platform
           @archs = archs
           @client_root = project.project_dir.realpath
+          @user_xcassets_paths = user_xcassets_paths
         end
       end
     end

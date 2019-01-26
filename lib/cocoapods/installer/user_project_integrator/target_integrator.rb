@@ -129,8 +129,11 @@ module Pod
           #
           # @return [void]
           #
-          def create_or_update_embed_frameworks_script_phase_to_target(native_target, script_path, input_paths_by_config = {}, output_paths_by_config = {})
-            phase = TargetIntegrator.create_or_update_shell_script_build_phase(native_target, BUILD_PHASE_PREFIX + EMBED_FRAMEWORK_PHASE_NAME)
+          def create_or_update_embed_frameworks_script_phase_to_target(native_target, script_path,
+                                                                       input_paths_by_config = {},
+                                                                       output_paths_by_config = {})
+            phase = TargetIntegrator.create_or_update_shell_script_build_phase(native_target,
+                                                                               BUILD_PHASE_PREFIX + EMBED_FRAMEWORK_PHASE_NAME)
             phase.shell_script = %("#{script_path}"\n)
             TargetIntegrator.set_input_output_paths(phase, input_paths_by_config, output_paths_by_config)
           end
@@ -141,7 +144,9 @@ module Pod
           #        The native target to remove the script phase from.
           #
           def remove_embed_frameworks_script_phase_from_target(native_target)
-            embed_build_phase = native_target.shell_script_build_phases.find { |bp| bp.name && bp.name.end_with?(EMBED_FRAMEWORK_PHASE_NAME) }
+            embed_build_phase = native_target.shell_script_build_phases.find do |bp|
+              bp.name && bp.name.end_with?(EMBED_FRAMEWORK_PHASE_NAME)
+            end
             return unless embed_build_phase.present?
             native_target.build_phases.delete(embed_build_phase)
           end
@@ -164,7 +169,9 @@ module Pod
           #
           # @return [void]
           #
-          def create_or_update_copy_resources_script_phase_to_target(native_target, script_path, input_paths_by_config = {}, output_paths_by_config = {})
+          def create_or_update_copy_resources_script_phase_to_target(native_target, script_path,
+                                                                     input_paths_by_config = {},
+                                                                     output_paths_by_config = {})
             phase_name = COPY_PODS_RESOURCES_PHASE_NAME
             phase = TargetIntegrator.create_or_update_shell_script_build_phase(native_target, BUILD_PHASE_PREFIX + phase_name)
             phase.shell_script = %("#{script_path}"\n)
@@ -177,7 +184,9 @@ module Pod
           #        The native target to remove the script phase from.
           #
           def remove_copy_resources_script_phase_from_target(native_target)
-            build_phase = native_target.shell_script_build_phases.find { |bp| bp.name && bp.name.end_with?(COPY_PODS_RESOURCES_PHASE_NAME) }
+            build_phase = native_target.shell_script_build_phases.find do |bp|
+              bp.name && bp.name.end_with?(COPY_PODS_RESOURCES_PHASE_NAME)
+            end
             return unless build_phase.present?
             native_target.build_phases.delete(build_phase)
           end
@@ -198,7 +207,9 @@ module Pod
           #
           def create_or_update_shell_script_build_phase(native_target, script_phase_name, show_env_vars_in_log = '0')
             build_phases = native_target.build_phases.grep(Xcodeproj::Project::Object::PBXShellScriptBuildPhase)
-            build_phases.find { |phase| phase.name && phase.name.end_with?(script_phase_name) }.tap { |p| p.name = script_phase_name if p } ||
+            build_phases.find { |phase| phase.name && phase.name.end_with?(script_phase_name) }.tap do |p|
+              p.name = script_phase_name if p
+            end ||
               native_target.project.new(Xcodeproj::Project::Object::PBXShellScriptBuildPhase).tap do |phase|
                 UI.message("Adding Build Phase '#{script_phase_name}' to project.") do
                   phase.name = script_phase_name
@@ -218,7 +229,9 @@ module Pod
           def create_or_update_user_script_phases(script_phases, native_target)
             script_phase_names = script_phases.map { |k| k[:name] }
             # Delete script phases no longer present in the target.
-            native_target_script_phases = native_target.shell_script_build_phases.select { |bp| !bp.name.nil? && bp.name.start_with?(USER_BUILD_PHASE_PREFIX) }
+            native_target_script_phases = native_target.shell_script_build_phases.select do |bp|
+              !bp.name.nil? && bp.name.start_with?(USER_BUILD_PHASE_PREFIX)
+            end
             native_target_script_phases.each do |script_phase|
               script_phase_name_without_prefix = script_phase.name.sub(USER_BUILD_PHASE_PREFIX, '')
               unless script_phase_names.include?(script_phase_name_without_prefix)
@@ -409,18 +422,24 @@ module Pod
           output_paths_by_config = {}
           if use_input_output_paths
             target.resource_paths_by_config.each do |config, resource_paths|
-              input_paths_key = XCFileListConfigKey.new(target.copy_resources_script_input_files_path(config), target.copy_resources_script_input_files_relative_path)
+              input_paths_key = XCFileListConfigKey.new(target.copy_resources_script_input_files_path(config),
+                                                        target.copy_resources_script_input_files_relative_path)
               input_paths_by_config[input_paths_key] = [script_path] + resource_paths
 
-              output_paths_key = XCFileListConfigKey.new(target.copy_resources_script_output_files_path(config), target.copy_resources_script_output_files_relative_path)
-              output_paths_by_config[output_paths_key] = TargetIntegrator.resource_output_paths(resource_paths)
+              output_paths_key = XCFileListConfigKey.new(target.copy_resources_script_output_files_path(config),
+                                                         target.copy_resources_script_output_files_relative_path)
+              resource_output_paths = TargetIntegrator.resource_output_paths(resource_paths)
+              resource_output_paths << target.shit
+              output_paths_by_config[output_paths_key] = resource_output_paths
             end
           end
 
           native_targets.each do |native_target|
             # Static library targets cannot include resources. Skip this phase from being added instead.
             next if native_target.symbol_type == :static_library
-            TargetIntegrator.create_or_update_copy_resources_script_phase_to_target(native_target, script_path, input_paths_by_config, output_paths_by_config)
+            TargetIntegrator.create_or_update_copy_resources_script_phase_to_target(native_target, script_path,
+                                                                                    input_paths_by_config,
+                                                                                    output_paths_by_config)
           end
         end
 
@@ -456,19 +475,23 @@ module Pod
           output_paths_by_config = {}
           if use_input_output_paths?
             target.framework_paths_by_config.each do |config, framework_paths|
-              input_paths_key = XCFileListConfigKey.new(target.embed_frameworks_script_input_files_path(config), target.embed_frameworks_script_input_files_relative_path)
+              input_paths_key = XCFileListConfigKey.new(target.embed_frameworks_script_input_files_path(config),
+                                                        target.embed_frameworks_script_input_files_relative_path)
               input_paths = input_paths_by_config[input_paths_key] = [script_path]
               framework_paths.each do |path|
                 input_paths.concat(path.all_paths)
               end
 
-              output_paths_key = XCFileListConfigKey.new(target.embed_frameworks_script_output_files_path(config), target.embed_frameworks_script_output_files_relative_path)
+              output_paths_key = XCFileListConfigKey.new(target.embed_frameworks_script_output_files_path(config),
+                                                         target.embed_frameworks_script_output_files_relative_path)
               output_paths_by_config[output_paths_key] = TargetIntegrator.framework_output_paths(framework_paths)
             end
           end
 
           native_targets_to_embed_in.each do |native_target|
-            TargetIntegrator.create_or_update_embed_frameworks_script_phase_to_target(native_target, script_path, input_paths_by_config, output_paths_by_config)
+            TargetIntegrator.create_or_update_embed_frameworks_script_phase_to_target(native_target, script_path,
+                                                                                      input_paths_by_config,
+                                                                                      output_paths_by_config)
           end
         end
 

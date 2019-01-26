@@ -6,6 +6,10 @@ module Pod
       class TargetInspector
         PLATFORM_INFO_URL = 'https://guides.cocoapods.org/syntax/podfile.html#platform'.freeze
 
+        # @return [Sandbox] The sandbox where the Pods should be installed.
+        #
+        attr_reader :sandbox
+
         # @return [TargetDefinition] the target definition to inspect
         #
         attr_reader :target_definition
@@ -23,7 +27,8 @@ module Pod
         # @param [Pathname] installation_root
         #        @see #installation_root
         #
-        def initialize(target_definition, installation_root)
+        def initialize(sandbox, target_definition, installation_root)
+          @sandbox = sandbox
           @target_definition = target_definition
           @installation_root = installation_root
         end
@@ -43,11 +48,10 @@ module Pod
           platform = compute_platform(targets)
           archs = compute_archs(targets)
           swift_version = compute_swift_version_from_targets(targets)
+          xcassets_paths = compute_xcassets_paths(targets)
 
           result = TargetInspectionResult.new(target_definition, user_project, project_target_uuids,
-                                              build_configurations, platform, archs)
-          result.xcasset_paths = compute_xcasset_paths(targets)
-
+                                              build_configurations, platform, archs, xcassets_paths)
           result.target_definition.swift_version = swift_version
           result
         end
@@ -210,13 +214,23 @@ module Pod
           end
         end
 
-        # TODO
+        # Computes the `.xcassets` paths relevant for the user's targets. This is to be used for combining the
+        # `.xcassets` files during the copy resources phases during compilation.
         #
-        def compute_xcasset_paths(targets)
+        # @param  [Array<PBXNativeTarget] targets the user's targets of the project of
+        #         #target_definition which needs to be integrated.
+        #
+        # @return [Array<String>] The relative to 'PODS_ROOT' paths of all `.xcassets` paths relevant to the user's
+        #         targets
+        #
+        def compute_xcassets_paths(targets)
           targets.flat_map do |t|
             bp = t.build_phases.find { |bp| bp.class == Xcodeproj::Project::PBXResourcesBuildPhase }
             unless bp.nil?
-              bp.file_display_names.select { |file_name| File.extname(file_name) == '.xcassets'}
+              bp.files_references.map(&:real_path).map do |file_ref|
+                next unless file_ref.extname == '.xcassets'
+                "${PODS_ROOT}/#{file_ref.relative_path_from(sandbox.root)}"
+              end
             end
           end.compact
         end
