@@ -34,6 +34,8 @@ module Pod
         #
         attr_reader :client_root
 
+        attr_accessor :xcasset_paths
+
         # Initialize a new instance
         #
         # @param [TargetDefinition] target_definition @see #target_definition

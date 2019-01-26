@@ -46,6 +46,8 @@ module Pod
 
           result = TargetInspectionResult.new(target_definition, user_project, project_target_uuids,
                                               build_configurations, platform, archs)
+          result.xcasset_paths = compute_xcasset_paths(targets)
+
           result.target_definition.swift_version = swift_version
           result
         end
@@ -206,6 +208,17 @@ module Pod
               file_predicate.call(build_file.file_ref)
             end
           end
+        end
+
+        # TODO
+        #
+        def compute_xcasset_paths(targets)
+          targets.flat_map do |t|
+            bp = t.build_phases.find { |bp| bp.class == Xcodeproj::Project::PBXResourcesBuildPhase }
+            unless bp.nil?
+              bp.file_display_names.select { |file_name| File.extname(file_name) == '.xcassets'}
+            end
+          end.compact
         end
 
         # Compute the Swift version for the target build configurations. If more

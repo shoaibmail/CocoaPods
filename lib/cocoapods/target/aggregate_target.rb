@@ -9,6 +9,10 @@ module Pod
     #
     EMBED_FRAMEWORKS_IN_HOST_TARGET_TYPES = [:app_extension, :framework, :static_library, :messages_extension, :watch_extension, :xpc_service].freeze
 
+    # TODO
+    #
+    attr_accessor :xcasset_paths
+
     # @return [TargetDefinition] the target definition of the Podfile that
     #         generated this target.
     #
