@@ -16,6 +16,10 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [florianbuerger](https://github.com/florianbuerger)
   [#8548](https://github.com/CocoaPods/CocoaPods/pull/8548) 
 
+* Adds support for referring to other podspecs during validation  
+  [Orta Therox](https://github.com/orta)
+  [#8536](https://github.com/CocoaPods/CocoaPods/pull/8536)
+
 ## 1.7.0.beta.1 (2019-02-22)
 
 ##### Enhancements
@@ -23,10 +27,6 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
 * Copy `bcsymbolmap` files of a vendored framework.  
   [dacaiguoguogmail](https://github.com/dacaiguoguogmail)
   [#8461](https://github.com/CocoaPods/CocoaPods/issues/8461)
-
-* Adds support for referring to other podspecs during validation  
-  [Orta Therox](https://github.com/orta)
-  [#8536](https://github.com/CocoaPods/CocoaPods/pull/8536)
 
 * Set the path of development pod groups to root directory of the Pod  
   [Eric Amorde](https://github.com/amorde)
